@@ -146,6 +146,9 @@
 
         bounds_group.addLayer(layer_DanubeDelta_1);
         cluster_DanubeDelta_1.addTo(map);
+            setTimeout(() => {
+  map.invalidateSize(true);
+}, 250);
         setBounds();
         </script>
     </body>
