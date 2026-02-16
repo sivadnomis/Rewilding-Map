@@ -23,6 +23,50 @@
   width: 100%;
   height: 100%;
 }
+/* Force a sane popup width (prevents 1-letter-per-line collapse) */
+.leaflet-popup-content-wrapper {
+font-size: 0.7rem !important;   /* smaller text */
+  min-width: 180px !important;
+  max-width: 220px !important;
+  max-height: none !important;
+}
+
+.leaflet-popup-content {
+  min-width: 180px !important;
+  max-width: 220px !important;
+  margin: 6px 8px !important;
+}
+
+/* Make the table behave */
+.leaflet-popup-content table {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Ensure wrapping behaves */
+.leaflet-popup-content th,
+.leaflet-popup-content td {
+  overflow-wrap: hidden !important;
+}
+.leaflet-popup-content a {
+  display: inline-block !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  word-break: break-all !important;   /* URLs can break anywhere */
+  overflow-wrap: anywhere !important;
+}
+
+/* 2) Make images smaller in a small popup */
+.leaflet-popup-content img {
+  display: block !important;
+  max-width: 100% !important;
+  height: auto !important;
+
+  /* cap how tall it can be */
+  max-height: 120px !important;
+  object-fit: cover !important;
+}
+
         </style>
         <title></title>
     </head>
@@ -70,6 +114,21 @@
         });
         overlay_Googlemap_0.addTo(map);
         map.addLayer(overlay_Googlemap_0);
+		
+		function limitTags(tagString, maxTags = 5) {
+  if (!tagString) return "";
+
+  const tags = String(tagString)
+    .split(/,\s+/)          // Flickr tags are space-separated
+    .filter(t => t.trim().length > 0);
+
+  if (tags.length <= maxTags) {
+    return tags.join(", ");
+  }
+
+  return tags.slice(0, maxTags).join(", ") + " …";
+}
+
         function pop_DanubeDelta_1(feature, layer) {
             layer.on({
                 mouseout: function(e) {
@@ -105,17 +164,21 @@
                     </tr>\
                     <tr>\
                         <th scope="row">Tags</th>\
-                        <td>' + (feature.properties['Tags'] !== null ? Autolinker.link(String(feature.properties['Tags'])) : '') + '</td>\
+                        <td>' + (feature.properties['Tags'] !== null
+  ? limitTags(feature.properties['Tags'], 5)
+  : '') + '</td>\
                     </tr>\
                     <tr>\
                         <th scope="row">Desc</th>\
                         <td>' + (feature.properties['Desc'] !== null ? Autolinker.link(String(feature.properties['Desc'])) : '') + '</td>\
                     </tr>\
                     <tr>\
-                        <td colspan="2">' + (feature.properties['image'] !== null ? Autolinker.link(String(feature.properties['image'])) : '') + '</td>\
+                        <tr>\
+  <td colspan="2">' + (feature.properties['image'] !== null ? renderImage(feature.properties['image']) : '') + '</td>\
+</tr>\
                     </tr>\
                 </table>';
-            layer.bindPopup(popupContent, {maxHeight: 400});
+            layer.bindPopup(popupContent);
         }
 
         function style_DanubeDelta_1_0() {
@@ -133,6 +196,18 @@
                 fillColor: 'rgba(184,95,0,1.0)',
             }
         }
+		
+		function renderImage(value) {
+  const s = String(value || "").trim();
+  if (!s) return "";
+
+  // If qgis2web already stored an <img ...> snippet, just use it
+  if (s.toLowerCase().includes("<img")) return s;
+
+  // Otherwise treat it like a URL
+  return '<img src="' + s.replace(/"/g, "&quot;") + '" alt="Photo" />';
+}
+
         map.createPane('pane_DanubeDelta_1');
         map.getPane('pane_DanubeDelta_1').style.zIndex = 401;
         map.getPane('pane_DanubeDelta_1').style['mix-blend-mode'] = 'normal';
