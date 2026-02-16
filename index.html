@@ -213,15 +213,19 @@
       }
 
       function style_DanubeDelta_1_0() {
+	  
+		// detect mobile screen
+		var isMobile = window.innerWidth <= 768;
+  
         return {
           pane: "pane_DanubeDelta_1",
-          radius: 4.0,
+          radius: isMobile ? 6 : 4,   // bigger on mobile
           opacity: 1,
           color: "rgba(35,35,35,1.0)",
           dashArray: "",
           lineCap: "butt",
           lineJoin: "miter",
-          weight: 1,
+          weight: isMobile ? 2 : 1,
           fill: true,
           fillOpacity: 1,
           fillColor: "rgba(184,95,0,1.0)"
